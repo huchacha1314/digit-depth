@@ -1,4 +1,4 @@
-
+#这段代码是训练3层MLP层 将RGBXY的数据 -> 深度值X Y
 import argparse
 import os
 
@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 import wandb
 import glob
+
 
 from pathlib import Path
 
@@ -17,7 +18,7 @@ from digit_depth.handlers import get_save_path, find_recent_model
 seed = 42
 torch.seed = seed
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-base_path = Path(__file__).parent.parent.resolve()
+base_path = Path(__file__).parent.parent.resolve()# base_path 被设置为当前脚本的上两级目录的绝对路径
 
 
 def train(train_loader, epochs, lr):
@@ -37,7 +38,7 @@ def train(train_loader, epochs, lr):
     loss_record=[]
     cnt=0
     total_step = len(train_loader)
-    for epoch in tqdm(range(1, 1 + num_epochs)):
+    for epoch in tqdm(range(1, 1 + num_epochs)):#tqdm 创建可视化进度条呢
         for i, (data, labels) in enumerate(train_loader):
             data = data.to(device)
             labels = labels.to(device)
