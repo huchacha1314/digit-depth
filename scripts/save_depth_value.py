@@ -1,5 +1,6 @@
 import cv2
 import torch
+import numpy as np
 from pathlib import Path
 from digit_depth.third_party import geom_utils
 from digit_depth.train.prepost_mlp import *
@@ -58,12 +59,15 @@ def main():
     dm_zero_counter = 0
     dm_zero = 0
 
+    # 图像文件夹路径
+    image_folder_path = base_path / "datasets"
+
     # 读取所有图像
-    image_paths = ["path/to/image1.jpg", "path/to/image2.jpg", ...]  # 替换为实际的图像路径
+    image_paths = list(image_folder_path.glob("*.jpg"))
 
     for image_path in image_paths:
         # 读取图像
-        frame = cv2.imread(image_path)
+        frame = cv2.imread(str(image_path))
 
         # 处理每张图像
         img_depth = process_image(frame, model, dm_zero)
@@ -76,12 +80,12 @@ def main():
             dm_zero = dm_zero / 50
             dm_zero_counter += 1
 
-        # 将深度保存为CSV文件
-        csv_path = Path(image_path).stem + "_depthvalue.csv"
+        # 将深度保存为CSV文件在/digit-depth/datasets中
+        csv_filename = image_path.stem + "_depthvalue.csv"
+        csv_path = image_folder_path / csv_filename
         np.savetxt(csv_path, img_depth, delimiter=",")
 
     print("深度处理完成，已保存为CSV文件。")
 
 if __name__ == "__main__":
     main()
-
