@@ -1,5 +1,10 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
-
+#这段代码包含了从梯度信息---深度信息 的 函数
+#（1）计算从法向量 到 梯度值 gradx_base, grady_base = geom_utils._normal_to_grad_depth
+#（2）重建深度值 img_depth_base = geom_utils._integrate_grad_depth
+#（3）将深度信息 映射 3D点云信息 points3d = geom_utils.depth_to_pts3
+#（4）去除背景影响 points3d = geom_utils.remove_background_pts
+#（5）生成3D点云信息 以方便成像 clouds = geom_utils.init_points_to_clouds
 import copy
 
 import numpy as np
