@@ -1,4 +1,6 @@
-#这段代码是训练3层MLP层 将RGBXY的数据 -> 深度值X Y
+#这段代码是训练3层MLP层 将RGB image transformed into a normal image
+#由于图像手动标定，只需标定圆心和圆周上的一点（数据集）
+
 import argparse
 import os
 
