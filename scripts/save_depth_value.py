@@ -1,5 +1,9 @@
 import cv2
 import torch
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..')) 
+print(sys.path)
 import numpy as np
 from pathlib import Path
 from digit_depth.third_party import geom_utils
