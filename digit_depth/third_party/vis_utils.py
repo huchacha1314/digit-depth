@@ -381,10 +381,22 @@ class ContactArea:
         self.contour_threshold = contour_threshold
 
     def __call__(self, target):
+        '''
+        target 为阈值处理后的图片
+        cv2.threshold(target, 0.03, 255, 1) 使用了阈值 0.03，将小于阈值的像素设为 0，大于等于阈值的像素设为 255 
+        '''
         ret, th = cv2.threshold(target, 0.03, 255, 1)
+        '''
+        cv2.THRESH_BINARY：阈值类型。表示将小于等于阈值150的像素值设置为零，将大于阈值的像素值255设置为最大值
+        '''
         ret3, thresh = cv2.threshold(th, 150, 255, cv2.THRESH_BINARY)
-        thresh = thresh.astype(np.uint8)
+        thresh = thresh.astype(np.uint8) #np.uint8 可能是为了确保其符合 OpenCV
         contours, _= cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        '''
+        contours:包含检测到的轮廓的列表,以点的形式进行存储
+        contours 是一个列表，其中每个contour都是一个数据列表，某个轮廓所有的点
+        因为图像具有复杂性，所以生成很多小的，无关紧要的轮廓，这些轮廓的点的数量很少，所以接下来要设置阈值将 小的轮廓过滤
+        '''
         result = self._compute_contact_area(contours, self.contour_threshold)
         if result is None:
             return 
@@ -430,7 +442,9 @@ class ContactArea:
 
         for contour in contours:
             if len(contour) > contour_threshold:
+                #将小的轮廓过滤，只留下嘴住哟啊的轮廓
                 ellipse = cv2.fitEllipse(contour)
+                #用最小二乘法拟合椭圆
                 if ellipse is Empty:
                     poly2, major_axis, major_axis_end, minor_axis, minor_axis_end,theta_degree=[0],[0],[0],[0],[0],0
                     return poly2, major_axis, major_axis_end, minor_axis, minor_axis_end,theta_degree
