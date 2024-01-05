@@ -5,6 +5,7 @@ from pathlib import Path
 from digit_depth.third_party import geom_utils
 from digit_depth.train.prepost_mlp import *
 from digit_depth.handlers import find_recent_model
+import torch
 
 # 设置设备
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -21,12 +22,12 @@ def process_image(frame, model, dm_zero):
     img_np, _ = post_proc_mlp(img_np)
 
     # 获取梯度图
-    gradx_img, grady_img = geom_utils._normal_to_grad_depth(img_normal=img_np, gel_width=cfg.sensor.gel_width,
-                                                            gel_height=cfg.sensor.gel_height, bg_mask=None)
+    gradx_img, grady_img = geom_utils._normal_to_grad_depth(img_normal=img_np, gel_width=0.01835,
+                                                            gel_height=0.02460, bg_mask=None)
 
     # 重建深度图
     img_depth = geom_utils._integrate_grad_depth(gradx_img, grady_img, boundary=None, bg_mask=None,
-                                                 max_depth=cfg.max_depth)
+                                                 max_depth=0.02076)
     img_depth = img_depth.detach().cpu().numpy()
 
     # 减去零深度
@@ -44,6 +45,11 @@ def process_image(frame, model, dm_zero):
         img = thresh4
         pt = ContactArea()
         theta = pt.__call__(target=thresh4)
+        #进行可视化
+        cv2.imshow("Visualized Depth", img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        cv2.imwrite("visualized_depth.png", img)
     else:
         img = thresh4
 
@@ -63,7 +69,7 @@ def main():
     image_folder_path = base_path / "datasets"
 
     # 读取所有图像
-    image_paths = list(image_folder_path.glob("*.jpg"))
+    image_paths = list(image_folder_path.glob("*.png"))
 
     for image_path in image_paths:
         # 读取图像
