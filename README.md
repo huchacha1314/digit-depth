@@ -88,6 +88,14 @@ color2normal model will be saved to a separate folder "models" in /digit-depth/ 
  
  - `python scripts/ros/depth_value_pub.py`: Publishes the maximum depth (deformation) value for the entire image when object is pressed. Accuracy depends on your MLP-depth model.
  - `python scripts/ros/digit_image_pub.py`: Publishes the RGB image from the sensor.
+## get PCA 
+ - `roscore`:remember to run the roscore first
+ - `python scripts/depth.py`:get the depth image
+   # open another terminal to get the PCA image
+ - `cd ws_moveit/`
+ - `source devel/setup.bash`
+ - `rqt_image_view`
+
 
 ## Issues
 - If you are using a 60 FPS sensor, you might need to change the fps value in config/digit.yaml file. There are some issues with 60 FPS. Refer to this [issue](https://github.com/facebookresearch/digit-interface/issues/10)
