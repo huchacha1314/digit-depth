@@ -32,17 +32,23 @@ def show_depth(cfg):
     dm_zero_counter = 0
     dm_zero = 0
     while not rospy.is_shutdown():
+        #TODO
+        #请确定 frame的格式
         frame = digit_call.get_frame()
+        #TODO
         img_np = preproc_mlp(frame)
         img_np = model(img_np).detach().cpu().numpy()
+        #TODO
         img_np, _ = post_proc_mlp(img_np)
         # get gradx and grady
         gradx_img, grady_img = geom_utils._normal_to_grad_depth(img_normal=img_np, gel_width=cfg.sensor.gel_width,
                                                                 gel_height=cfg.sensor.gel_height,bg_mask=None)
         # reconstruct depth
         img_depth = geom_utils._integrate_grad_depth(gradx_img, grady_img, boundary=None, bg_mask=None,max_depth=cfg.max_depth)
+        # TODO
         img_depth = img_depth.detach().cpu().numpy() # final depth image for current image
         # Get the first 50 frames and average them to get the zero depth
+        # 获取50张 depth background 的深度图，以确定0基准
         if dm_zero_counter < 50:
             dm_zero += img_depth
             dm_zero_counter += 1
@@ -52,16 +58,20 @@ def show_depth(cfg):
             dm_zero_counter += 1
         
         # remove the zero depth
+        # 将 再次生成的图片 减去 背景的深度值
         diff = img_depth - dm_zero
         # convert pixels into 0-255 range
         diff = diff*255
         diff = diff*-1
-
+        
+        #TODO thresh4
         ret, thresh4 = cv2.threshold(diff, 0, 255, cv2.THRESH_TOZERO)
         if cfg.visualize.ellipse:
             img = thresh4
+            # TODO pt
             pt = ContactArea()
             theta = pt.__call__(target=thresh4)
+            #TODO msg
             msg = br.cv2_to_imgmsg(img, encoding="passthrough")
             msg.header.stamp = rospy.Time.now()
             depth_pub.publish(msg)
