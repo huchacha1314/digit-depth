@@ -11,6 +11,7 @@ from digit_depth.digit import DigitSensor
 from digit_depth.train.prepost_mlp import *
 from digit_depth.handlers import find_recent_model
 from digit_depth.third_party.vis_utils import ContactArea
+import numpy as np
 seed = 42
 torch.seed = seed
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -88,13 +89,23 @@ def show_depth(cfg):
         diff = diff*255
         diff = diff*-1
         
-        #TODO thresh4
+        #TODO thresh4 经过阈值化处理 的图片 小于0 变为0
         ret, thresh4 = cv2.threshold(diff, 0, 255, cv2.THRESH_TOZERO)
+        
         if cfg.visualize.ellipse:
             img = thresh4
             # TODO pt
             pt = ContactArea()
             theta = pt.__call__(target=thresh4)
+            '''
+            直接输出 major_axis, major_axis_end, minor_axis, minor_axis_end
+            theta, major_axis, major_axis_end, minor_axis, minor_axis_end = pt.__call__(target=thresh4)
+            计算椭圆的面积
+            a = np.linalg.norm(np.array(major_axis) - np.array(major_axis_end)) / 2.0
+            b = np.linalg.norm(np.array(minor_axis) - np.array(minor_axis_end)) / 2.0
+            ellipse_area = np.pi * a * b
+            print(ellipse_area)
+            '''
             #TODO msg
             msg = br.cv2_to_imgmsg(img, encoding="passthrough")
             msg.header.stamp = rospy.Time.now()
