@@ -19,8 +19,36 @@ torch.seed = seed
 # 设置基本路径
 base_path = Path(__file__).parent.parent.resolve()
 
+#返回50张背景图的平均值
+def generate_dm_zero():
+    frames_folder = '/pathfolder' #50张背景图的文件夹
+    dm_zero_counter = 0
+    dm_zero = 0
+    for filename in sorted(os.listdir(frames_folder))[:50]:
+        if filename.endswith(".png"):
+            frame_path = os.path.join(frames_folder, filename)
+            frame = cv2.imread(frame_path)
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Convert to grayscale if needed
+            
+            img_np = preproc_mlp(frame)
+            img_np = model(img_np).detach().cpu().numpy()
+            img_np, _ = post_proc_mlp(img_np)
+            gradx_img, grady_img = geom_utils._normal_to_grad_depth(img_normal=img_np,
+                                                                    gel_width=cfg.sensor.gel_width,
+                                                                    gel_height=cfg.sensor.gel_height, bg_mask=None)
+            img_depth = geom_utils._integrate_grad_depth(gradx_img, grady_img,
+                                                        boundary=None, bg_mask=None, max_depth=cfg.max_depth)
+            img_depth = img_depth.detach().cpu().numpy()
+
+            dm_zero += img_depth
+            dm_zero_counter += 1
+
+    dm_zero /= 50
+    return dm_zero
+
 def process_image(frame, model, dm_zero):
     # 对图像进行预处理
+
     img_np = preproc_mlp(frame)
     img_np = model(img_np).detach().cpu().numpy()
     img_np, _ = post_proc_mlp(img_np)
