@@ -21,6 +21,9 @@ base_path = Path(__file__).parent.parent.resolve()
 
 #返回50张背景图的平均值
 def generate_dm_zero():
+    model_path = find_recent_model(f"{base_path}/models")
+    model = torch.load(model_path).to(device)
+    
     background_folder = '/pathfolder' #50张背景图的文件夹
     dm_zero_counter = 0
     dm_zero = 0
@@ -46,9 +49,11 @@ def generate_dm_zero():
     dm_zero /= 50
     return dm_zero
 
-def show_E_area(frame, model):
+def show_E_area():
     # 对图像进行预处理
     dm_zero = generate_dm_zero()
+    model_path = find_recent_model(f"{base_path}/models")
+    model = torch.load(model_path).to(device)
     frame_folder = '/pathfolder' #带有force value的png文件夹
     for filename in sorted(os.listdir(frames_folder))[:50]:# 记得更改采集图片的数量
         if filename.endswith(".png"):
@@ -82,60 +87,19 @@ def show_E_area(frame, model):
             if cfg.visualize.ellipse:
                 img = thresh4
                 pt = ContactArea()
-            直接输出 major_axis, major_axis_end, minor_axis, minor_axis_end
-            theta, major_axis, major_axis_end, minor_axis, minor_axis_end = pt.__call__(target=thresh4)
-            计算椭圆的面积
-            a = np.linalg.norm(np.array(major_axis) - np.array(major_axis_end)) / 2.0
-            b = np.linalg.norm(np.array(minor_axis) - np.array(minor_axis_end)) / 2.0
-            ellipse_area = np.pi * a * b
-            print(ellipse_area)
-                #进行可视化
-                cv2.imshow("Visualized Depth", img)
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
-                cv2.imwrite("visualized_depth.png", img)
-            else:
-                img = thresh4
+               
+                theta, major_axis, major_axis_end, minor_axis, minor_axis_end = pt.__call__(target=thresh4)
+                a = np.linalg.norm(np.array(major_axis) - np.array(major_axis_end)) / 2.0
+                b = np.linalg.norm(np.array(minor_axis) - np.array(minor_axis_end)) / 2.0
+                ellipse_area = np.pi * a * b
+    
         
-            return img
+            return ellipse_area
 
-def main():
-    # 加载模型
-    model_path = find_recent_model(f"{base_path}/models")
-    model = torch.load(model_path).to(device)
-    model.eval()
 
-    # 初始化零深度计算
-    dm_zero_counter = 0
-    dm_zero = 0
 
-    # 图像文件夹路径
-    image_folder_path = base_path / "datasets"
 
-    # 读取所有图像
-    image_paths = list(image_folder_path.glob("*.png"))
-
-    for image_path in image_paths:
-        # 读取图像
-        frame = cv2.imread(str(image_path))
-
-        # 处理每张图像
-        img_depth = process_image(frame, model, dm_zero)
-
-        # 累计零深度
-        if dm_zero_counter < 50:
-            dm_zero += img_depth
-            dm_zero_counter += 1
-        elif dm_zero_counter == 50:
-            dm_zero = dm_zero / 50
-            dm_zero_counter += 1
-
-        # 将深度保存为CSV文件在/digit-depth/datasets中
-        csv_filename = image_path.stem + "_depthvalue.csv"
-        csv_path = image_folder_path / csv_filename
-        np.savetxt(csv_path, img_depth, delimiter=",")
-
-    print("深度处理完成，已保存为CSV文件。")
 
 if __name__ == "__main__":
-    main()
+    area=show_E_area()
+    print(area)
