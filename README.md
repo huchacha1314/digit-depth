@@ -57,7 +57,7 @@ After changing the config params, run the following scripts in the following ord
 - `pip install . `
 Now you should have the package installed in your python environment.
 To train the model, you need to collect data first. You can use the following scripts to collect data:
-- `source /home/jiaixn.hu/anaconda3/bin/activate` .
+- `source /home/jiaxin.hu/anaconda3/bin/activate` .
 - `conda activate digit` .
 - `cd Tactile/digit-depth/` .
   
